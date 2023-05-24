@@ -1,30 +1,28 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { SplashScreen, Stack } from 'expo-router';
-import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
+import { Suspense } from "react";
+import { useColorScheme } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from "@react-navigation/native";
+import { useFonts } from "expo-font";
+import { SplashScreen, Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { TamaguiProvider, Text, Theme } from "tamagui";
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
+import config from "../tamagui.config";
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
+  initialRouteName: "(tabs)",
 };
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    ...FontAwesome.font,
+  const [loaded] = useFonts({
+    Inter: require("@tamagui/font-inter/otf/Inter-Medium.otf"),
+    InterBold: require("@tamagui/font-inter/otf/Inter-Bold.otf"),
   });
-
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
-  useEffect(() => {
-    if (error) throw error;
-  }, [error]);
 
   return (
     <>
@@ -39,13 +37,21 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-        </Stack>
-      </ThemeProvider>
-    </>
+    <TamaguiProvider config={config}>
+      <SafeAreaView style={{ flex: 1 }}>
+        <Suspense fallback={<Text>Loading...</Text>}>
+          <Theme name={colorScheme}>
+            <ThemeProvider
+              value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+            >
+              <Stack>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              </Stack>
+            </ThemeProvider>
+          </Theme>
+        </Suspense>
+      </SafeAreaView>
+      <StatusBar style="light" backgroundColor="#000000" />
+    </TamaguiProvider>
   );
 }
